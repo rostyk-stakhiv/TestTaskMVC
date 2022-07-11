@@ -1,0 +1,89 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+}
+
+table {
+    margin-top: 10px;
+    width: 100%;
+}
+
+#sort {
+    text-align: left;
+    width: 100%;
+    border: 2px solid black;
+    padding: 5px 5px 5px 5px;
+    margin-bottom: 10px;
+}
+
+    #sort button {
+        background-color: dodgerblue;
+        color: white;
+        border-radius: 3px;
+        width: 10%;
+    }
+
+    #sort select {
+        width: 13%;
+    }
+
+#filters {
+    text-align: left;
+    width: 100%;
+    border: 2px solid black;
+    padding: 5px 5px 5px 5px;
+}
+
+    #filters button {
+        background-color: dodgerblue;
+        color: white;
+        border-radius: 3px;
+        width: 10%;
+    }
+
+    #filters select {
+        width: 23.8%;
+    }
+
+    #filters .salary {
+        width: 9.5%;
+    }
+
+    #filters .date {
+        width: 9.9%;
+    }
+
+    #filters input{
+        width:25%;
+    }
+
+table, td, th, tr {
+    border: 1px solid black;
+    padding: 2px 2px 2px 2px;
+}
+
+.Upload{
+    width:100%;
+    border:3px solid black;
+    padding:5px 5px 5px 5px;
+}
+.Upload input{
+    background-color:dodgerblue;
+    margin-top:10px;
+    color:white;
+    border-radius:3px;
+}

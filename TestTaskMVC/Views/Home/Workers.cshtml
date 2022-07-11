@@ -1,0 +1,194 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@model WorkersViewModel
+@{
+    ViewData["Title"] = "Workers Page";
+}
+
+<body>
+    <div class="text-center">
+        <div id="sort">
+            <h5>
+                Sort: <select id="sortby">
+                    <option value="1">Name</option>
+                    <option value="3">Date Of Birth</option>
+                    <option value="5">Married</option>
+                    <option value="7">Phone</option>
+                    <option value="9">Salary</option>
+                </select> <select id="sorttype">
+                    <option value="1">Ascending</option>
+                    <option value="2">Descending</option>
+                </select>
+            </h5>
+            <button onclick="Sort()">Sort</button>
+        </div>
+        <div id="filters">
+            <h5>Name: <input type="text" id="nameFilter" /></h5>
+            <h5>Date from: <input type="date" id="dateFilterFrom" class="date" /> to <input type="date" class="date" id="dateFilterTo" /></h5>
+            <h5>
+                Married: <select id="marriedFilter">
+                    <option value="all">all</option>
+                    <option value="true">true</option>
+                    <option value="false">false</option>
+                </select>
+            </h5>
+            <h5>Phone: <input type="text" id="phoneFilter" /></h5>
+            <h5>Salary from: <input type="number" id="salaryFilterFrom" class="salary" step="0.01" /> to <input type="number" id="salaryFilterTo" class="salary" step="0.01" /></h5>
+            <button onclick="Filter()">Enable filters</button>
+        </div>
+        <table class="workers">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Date Of Birth</th>
+                    <th>Married</th>
+                    <th>Phone</th>
+                    <th>Salary</th>
+                </tr>
+            </thead>
+
+            <tbody id="workers">
+                @foreach (var item in Model.Workers)
+                {
+                    <tr id="@item.Id">
+                        <td id="n @item.Id">@item.Name</td>
+                        <td id="name @item.Id" hidden><input type="text" value="@item.Name" /></td>
+                        <td id="d @item.Id">@item.DateOfBirth.ToLongDateString()</td>
+                        <td id="date @item.Id" hidden><input type="date" value="@item.DateOfBirth.Date.Date.ToString("yyyy-MM-dd")" /></td>
+                        <td id="m @item.Id">@item.Married</td>
+                        <td id="married @item.Id" hidden>
+                            @if (item.Married)
+                            {
+                                <input type="checkbox" checked />
+                            }
+                            else
+                            {
+                                <input type="checkbox" />
+                            }
+                        </td>
+                        <td id="p @item.Id">@item.Phone</td>
+                        <td id="phone @item.Id" hidden><input type="tel" value="@item.Phone" /></td>
+                        <td id="s @item.Id">@item.Salary</td>
+                        <td id="salary @item.Id" hidden><input type="number" step="0.01" value="@item.Salary.ToString().Replace(",",".")" /></td>
+                        <td><button onclick="Delete(@item.Id)">Delete</button></td>
+                        <td id="upd @item.Id"><button onclick="Update(@item.Id)">Update</button></td>
+                        <td id="edit @item.Id" hidden><button onclick="Edit(@item.Id)">Save</button></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.2/axios.js"></script>
+<script>
+    async function Delete(id) {
+        await axios.delete(`/Home/Workers?id=${id}`)
+            .catch((error) => { console.error(error) });
+        window.location.reload(true)
+    }
+
+    function Update(id) {
+        document.getElementById("n " + id).hidden = true;
+        document.getElementById("d " + id).hidden = true;
+        document.getElementById("m " + id).hidden = true;
+        document.getElementById("p " + id).hidden = true;
+        document.getElementById("s " + id).hidden = true;
+        document.getElementById("upd " + id).hidden = true;
+
+        document.getElementById("name " + id).hidden = false;
+        document.getElementById("date " + id).hidden = false;
+        document.getElementById("married " + id).hidden = false;
+        document.getElementById("phone " + id).hidden = false;
+        document.getElementById("salary " + id).hidden = false;
+        document.getElementById("edit " + id).hidden = false;
+    }
+
+    function Edit(id) {
+        var married = document.getElementById("married " + id).children[0].checked ? true : false
+        var s = {
+            "id": parseInt(id),
+            "name": document.getElementById("name " + id).children[0].value,
+            "dateOfBirth": document.getElementById("date " + id).children[0].value,
+            "married": married,
+            "phone": document.getElementById("phone " + id).children[0].value,
+            "salary": parseFloat(document.getElementById("salary " + id).children[0].value)
+        }
+        console.log(s)
+        axios.put("/Home/Workers", s, { headers: { "Content-Type": 'application/json' } })
+            .then(() => { location.reload(true) }).catch(err => alert(err.response.data))
+
+
+    }
+
+    function Sort() {
+        var workers = document.getElementById("workers")
+        var arrToSort = Array.prototype.slice.call(workers.children)
+
+        var index = document.getElementById("sortby").value
+        arrToSort.sort(comparer(parseInt(index)))
+        if (document.getElementById("sorttype").value === "2") {
+            arrToSort.reverse()
+        }
+        workers.innerHTML = ""
+        for (let i = 0; i < arrToSort.length; i++) {
+            workers.appendChild(arrToSort[i])
+        }
+
+    }
+
+    function comparer(index) {
+        return function(a, b) {
+            if (index == 5) {
+                return (!a.children[index].children[0].checked && b.children[index].children[0].checked) ? -1 : 0
+            }
+            val1 = a.children[index].children[0].value
+            val2 = b.children[index].children[0].value
+            if (val1 < val2) {
+                return -1
+            }
+            else if (val1 > val2) {
+                return 1
+            }
+            else {
+                return 0
+            }
+        }
+    }
+
+    function Filter() {
+        var workers = document.getElementById("workers").children
+        var name = document.getElementById("nameFilter").value
+        var dateFrom = document.getElementById("dateFilterFrom").value
+        var dateTo = document.getElementById("dateFilterTo").value
+        var married = document.getElementById("marriedFilter").value
+        var phone = document.getElementById("phoneFilter").value
+        var salaryFrom = document.getElementById("salaryFilterFrom").value
+        var salaryTo = document.getElementById("salaryFilterTo").value
+
+        for (let i = 0; i < workers.length; i++) {
+            console.log(workers[i])
+            if (!workers[i].children[1].children[0].value.toLowerCase().includes(name.toLowerCase())) {
+                workers[i].hidden = true
+            }
+            else if ((workers[i].children[3].children[0].value <= dateFrom && dateFrom !== "")
+                || (workers[i].children[3].children[0].value >= dateTo && dateTo !== "")) {
+                workers[i].hidden = true
+            }
+            else if (workers[i].children[5].children[0].checked.toString() !== married && married !== "all") {
+                workers[i].hidden = true
+            }
+            else if (!workers[i].children[7].children[0].value.includes(phone)) {
+                workers[i].hidden = true
+            }
+            else if ((workers[i].children[9].children[0].value <= salaryFrom && salaryFrom !== "")
+                || (workers[i].children[9].children[0].value >= salaryTo && salaryTo !== "")) {
+                workers[i].hidden = true
+            }
+            else {
+                workers[i].hidden = false
+            }
+        }
+    }
+
+</script>
